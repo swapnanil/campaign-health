@@ -1,0 +1,46 @@
+{
+  "campaign_id": "camp_001",
+  "campaign_name": "Display Retargeting Q1",
+  "overall_health": "critical",
+  "health_score": 28,
+  "executive_summary": "This display retargeting campaign has entered a critical ad fatigue spiral. Frequency has reached 9.2 impressions per user while CTR dropped from 0.12% to 0.10% and CPA spiked 68% week-over-week from ₹250 to ₹420 — a textbook saturation event. Budget is nearly fully consumed (95%) which means you are overspending on a burned audience with no conversion efficiency.",
+  "issues": [
+    {
+      "metric": "CPA",
+      "observed_value": "₹420 (↑68% WoW vs ₹250)",
+      "expected_range": "₹200–₹280",
+      "severity": "critical",
+      "root_cause": "Audience saturation caused by excessive frequency (9.2). Users have seen the ad too many times and conversion intent has collapsed. The same spend is now chasing a much smaller pool of convertible users, pushing CPA up sharply.",
+      "recommendation": "Immediately apply a frequency cap of 3–4 per user per week. Refresh creatives with new messaging variants. Expand audience pool with lookalike segments to dilute saturation. Consider pausing the campaign for 72 hours to allow audience cooldown.",
+      "estimated_impact": "25–40% CPA reduction within 7 days of frequency cap and creative refresh"
+    },
+    {
+      "metric": "Frequency",
+      "observed_value": "9.2 avg impressions per unique user",
+      "expected_range": "3–5 for display retargeting",
+      "severity": "critical",
+      "root_cause": "No frequency cap is set or the existing cap is too high. The campaign is repeatedly hitting the same small retargeting pool, causing ad fatigue and wasted spend on non-converting impressions.",
+      "recommendation": "Set frequency cap to 3/day or 5/week at the campaign level. Widen the retargeting window from 7 to 30 days to access a larger pool, or layer in prospecting audiences.",
+      "estimated_impact": "Stops ~40% of wasted impressions, directly reducing effective CPM and CPA"
+    },
+    {
+      "metric": "CTR",
+      "observed_value": "0.10% (↓17% WoW)",
+      "expected_range": "0.10–0.15% for display retargeting",
+      "severity": "warning",
+      "root_cause": "CTR decline correlates directly with frequency increase — users recognise and ignore the ad. Creative fatigue is compounding the audience saturation problem.",
+      "recommendation": "Test 3 new creative variants immediately. A/B test different CTAs, imagery, and offers. Rotate existing creatives on a 2-week schedule going forward.",
+      "estimated_impact": "10–20% CTR recovery with fresh creatives, directly improving conversion volume"
+    }
+  ],
+  "top_3_actions": [
+    "Set frequency cap to 3/week immediately to stop audience burnout and wasted spend",
+    "Launch 3 new creative variants with different messaging — rotate on a 2-week cycle",
+    "Expand retargeting pool: increase lookback window to 30 days or add lookalike audience layer"
+  ],
+  "positive_signals": [
+    "Win rate is healthy at 35% — bidding strategy is competitive and floor prices are not a barrier",
+    "Viewability at 63% is within acceptable range for display — placement quality is not the issue",
+    "Historical CPA of ₹250 (weeks 1–3) confirms the underlying campaign mechanics work — this is a fatigue problem, not a structural campaign failure"
+  ]
+}
