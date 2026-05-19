@@ -8,19 +8,32 @@ from typing import Annotated
 import anthropic
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
 load_dotenv()
 
-from agent.diagnostician import diagnose_batch, diagnose_campaign
+from agent.alerting import DEFAULT_ALERT_RULES, evaluate_alerts
+from agent.benchmarks import get_vertical_benchmarks, list_verticals
+from agent.diagnostician import compare_campaigns, diagnose_batch, diagnose_campaign
+from agent.digest import generate_weekly_digest
 from agent.models import (
+    AlertReport,
+    AlertRule,
     BatchDiagnosis,
     BenchmarkResponse,
+    CampaignComparison,
     CampaignDiagnosis,
     CampaignMetrics,
     HealthResponse,
+    PacingProjection,
+    PrioritisedDiagnosis,
+    VerticalBenchmarks,
+    WeeklyDigest,
 )
+from agent.pacing import project_budget_pacing
 from agent.preprocessor import load_csv, validate_metrics
+from agent.prioritiser import prioritise_recommendations
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +142,78 @@ async def diagnose_batch_endpoint(campaigns: list[CampaignMetrics]) -> BatchDiag
         return diagnose_batch(campaigns, client=get_client())
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
+class AlertEvalRequest(BaseModel):
+    metrics: CampaignMetrics
+    rules: list[AlertRule] | None = None
+
+
+@app.post("/alerts/evaluate", response_model=AlertReport, tags=["Alerts"])
+async def evaluate_alerts_endpoint(req: AlertEvalRequest) -> AlertReport:
+    return evaluate_alerts(req.metrics, req.rules)
+
+
+@app.get("/alerts/rules", tags=["Alerts"])
+async def get_default_rules() -> list[AlertRule]:
+    return DEFAULT_ALERT_RULES
+
+
+class PacingRequest(BaseModel):
+    campaign_id: str
+    current_spend: float
+    total_budget: float
+    period_hours: float
+    elapsed_hours: float
+
+
+@app.post("/pacing", response_model=PacingProjection, tags=["Pacing"])
+async def pacing_endpoint(req: PacingRequest) -> PacingProjection:
+    try:
+        return project_budget_pacing(
+            req.campaign_id, req.current_spend, req.total_budget,
+            req.period_hours, req.elapsed_hours,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.get("/benchmarks/verticals", tags=["Benchmarks"])
+async def list_verticals_endpoint() -> dict:
+    return {"verticals": list_verticals()}
+
+
+@app.get("/benchmarks/{vertical}", response_model=VerticalBenchmarks, tags=["Benchmarks"])
+async def get_vertical_endpoint(vertical: str) -> VerticalBenchmarks:
+    return get_vertical_benchmarks(vertical)
+
+
+@app.post("/diagnose/prioritise", response_model=PrioritisedDiagnosis, tags=["Diagnosis"])
+async def prioritise_endpoint(diagnosis: CampaignDiagnosis) -> PrioritisedDiagnosis:
+    return prioritise_recommendations(diagnosis)
+
+
+@app.post("/diagnose/compare", response_model=CampaignComparison, tags=["Diagnosis"])
+async def compare_endpoint(campaigns: list[CampaignMetrics]) -> CampaignComparison:
+    if len(campaigns) != 2:
+        raise HTTPException(status_code=422, detail="Exactly 2 campaigns required for comparison.")
+    try:
+        return compare_campaigns(campaigns[0], campaigns[1], client=get_client())
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
+@app.post("/digest", response_model=WeeklyDigest, tags=["Digest"])
+async def digest_endpoint(
+    diagnoses: list[CampaignDiagnosis],
+    week_label: str | None = None,
+) -> WeeklyDigest:
+    if not diagnoses:
+        raise HTTPException(status_code=422, detail="At least one diagnosis is required.")
+    try:
+        return generate_weekly_digest(diagnoses, week_label=week_label, client=get_client())
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
 

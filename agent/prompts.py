@@ -127,6 +127,74 @@ def build_batch_fleet_prompt(campaign_ids: list[str]) -> str:
     )
 
 
+def build_comparison_prompt(
+    campaign_a_id: str,
+    campaign_b_id: str,
+    pre_a: "PreprocessedMetrics",
+    pre_b: "PreprocessedMetrics",
+    currency: str = "INR",
+) -> str:
+    def _fmt(v: float | None, unit: str = "") -> str:
+        return "N/A" if v is None else f"{v}{unit}"
+
+    def _row(label: str, a, b, unit: str = "") -> str:
+        return f"  {label}: A={_fmt(a, unit)}  B={_fmt(b, unit)}"
+
+    lines = [
+        "You are comparing two ad campaigns head-to-head.",
+        f"Campaign A: {campaign_a_id}",
+        f"Campaign B: {campaign_b_id}",
+        "",
+        "=== METRIC COMPARISON ===",
+        _row("CTR", pre_a.ctr_computed or pre_a.ctr, pre_b.ctr_computed or pre_b.ctr, "%"),
+        _row("CPA", pre_a.cpa_computed or pre_a.cpa, pre_b.cpa_computed or pre_b.cpa, f" {currency}"),
+        _row("CPC", pre_a.cpc_computed or pre_a.cpc, pre_b.cpc_computed or pre_b.cpc, f" {currency}"),
+        _row("CVR", pre_a.cvr_computed or pre_a.cvr, pre_b.cvr_computed or pre_b.cvr, "%"),
+        _row("ROAS", pre_a.roas, pre_b.roas),
+        _row("Win Rate", pre_a.win_rate, pre_b.win_rate, "%"),
+        _row("Frequency", pre_a.frequency, pre_b.frequency),
+        _row("Spend", pre_a.spend, pre_b.spend, f" {currency}"),
+        _row("Impressions", pre_a.impressions, pre_b.impressions),
+        _row("Viewability", pre_a.viewability, pre_b.viewability, "%"),
+        "",
+        "Identify which campaign is performing better overall and on each dimension.",
+        "Explain the key differentiators — what is specifically causing one to outperform the other.",
+        "",
+        "Respond with JSON:",
+        json.dumps({
+            "overall_winner": f"<{campaign_a_id} | {campaign_b_id} | null if tied>",
+            "comparison_narrative": "<3-5 sentence expert analysis of why the winner outperforms>",
+            "key_differentiators": ["<specific metric or pattern>", "<specific metric or pattern>"],
+        }, indent=2),
+        "Respond with valid JSON only. No markdown fences, no preamble.",
+    ]
+    return "\n".join(lines)
+
+
+def build_digest_prompt(
+    total: int,
+    healthy: int,
+    degraded: int,
+    critical: int,
+    most_common_issues: list[str],
+    critical_campaign_ids: list[str],
+) -> str:
+    lines = [
+        f"You are writing a weekly fleet digest for {total} ad campaigns.",
+        f"Health summary: {healthy} healthy, {degraded} degraded, {critical} critical.",
+        f"Most common issues across the fleet: {', '.join(most_common_issues) if most_common_issues else 'None identified'}.",
+    ]
+    if critical_campaign_ids:
+        lines.append(f"Campaigns requiring immediate attention: {', '.join(critical_campaign_ids)}.")
+    lines += [
+        "",
+        "Write a digest_summary of 2-4 sentences for a client-facing weekly report.",
+        "Be specific: name the dominant issue, its business impact, and the single most important action.",
+        "Respond with only the digest_summary text — no JSON, no preamble.",
+    ]
+    return "\n".join(lines)
+
+
 def schema_correction_prompt(bad_json: str) -> str:
     return (
         f"Your previous response was not valid JSON or did not match the required schema.\n"

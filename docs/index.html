@@ -207,9 +207,9 @@
     <div class="container">
       <div class="hero-inner">
         <div class="hero-left">
-          <div class="tool-badge">Ad Tech · Diagnosis</div>
+          <div class="tool-badge">Ad Tech · Diagnosis · Alerting · Ops</div>
           <h1 class="hero-title">Campaign<br><span class="accent">Health</span></h1>
-          <p class="hero-desc">"Paste your campaign metrics. Get expert diagnosis — root causes, severity, and exactly what to fix first."</p>
+          <p class="hero-desc">"Paste your campaign metrics. Get root causes, custom alerts, budget pacing, and a weekly digest — not symptoms, operations."</p>
           <div class="btn-group">
             <a href="https://github.com/swapnanil/campaign-health" target="_blank" class="btn-primary">View on GitHub</a>
             <a href="https://github.com/swapnanil/campaign-health#api-usage" target="_blank" class="btn-secondary">Read the Docs</a>
@@ -221,24 +221,23 @@
             <div class="terminal-bar">
               <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
             </div>
-            <pre><span class="t-prompt">$</span> <span class="t-cmd">docker-compose run cli diagnose</span> \
-  <span class="t-flag">--file</span> <span class="t-val">examples/sample_campaign_cpa_spike.csv</span> \
-  <span class="t-flag">--format</span> <span class="t-val">markdown</span>
+            <pre><span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /alerts/evaluate</span> \
+  <span class="t-flag">-d</span> <span class="t-val">'{"metrics": {"campaign_id": "CAMP_001",
+     "cpa": 620, "roas": 0.85, "win_rate": 8}}'</span>
 
-<span class="t-cmt"># Pre-processing metrics…</span>
-<span class="t-cmt"># CPA ↑68% WoW · Frequency 9 · flagged</span>
+<span class="t-cmt"># 3 alerts triggered</span>
 
-<span class="t-head">## Campaign Health Report</span>
-<span class="t-dim">health_score: </span><span class="t-sev">31 / 100</span><span class="t-dim"> — critical</span>
+<span class="t-head">Alert Report — CAMP_001</span>
+<span class="t-key">highest_severity</span><span class="t-muted">:</span> <span class="t-sev">critical</span>
+<span class="t-key">triggers</span><span class="t-muted">:</span>
+  <span class="t-sev">CPA Critical</span>  <span class="t-dim">cpa=620 > 500</span>
+  <span class="t-sev">ROAS Critical</span>  <span class="t-dim">roas=0.85 &lt; 1.0</span>
+  <span class="t-pass">Win Rate Critical</span>  <span class="t-dim">win_rate=8 &lt; 10</span>
 
-<span class="t-head">Issue (Critical)</span>
-<span class="t-dim">CPA ₹420 (↑68% WoW from ₹250)</span>
-<span class="t-sev">root_cause:</span> <span class="t-dim">Frequency 9 = audience</span>
-<span class="t-dim">exhaustion — not a bid problem</span>
-
-<span class="t-head">Top Action</span>
-<span class="t-str">Pause creative, add frequency cap 4,
-expand lookalike before more spend</span></pre>
+<span class="t-head">Pacing Projection</span>
+<span class="t-key">status</span><span class="t-muted">:</span> <span class="t-sev">burnout_risk</span>
+<span class="t-key">hours_to_exhaustion</span><span class="t-muted">:</span> <span class="t-sev">3.2h</span>
+<span class="t-key">recommendation</span><span class="t-muted">:</span> <span class="t-dim">Apply spend cap now</span></pre>
           </div>
         </div>
       </div>
@@ -304,33 +303,33 @@ expand lookalike before more spend</span></pre>
     <div class="container">
       <div class="section-header reveal">
         <div class="section-tag">Features</div>
-        <h2 class="section-title">Root causes.<br>Not symptoms.</h2>
-        <p class="section-sub">Every feature is designed to surface why a campaign is underperforming, not just that it is.</p>
+        <h2 class="section-title">Diagnose.<br>Alert.<br>Act.</h2>
+        <p class="section-sub">Eight capabilities covering the full ops cycle — from root cause to remediation to client reporting.</p>
       </div>
       <div class="features-grid">
         <div class="feat-card reveal">
-          <div class="feat-title">Pre-LLM Preprocessor</div>
-          <div class="feat-desc">Derives metrics, detects anomalies, and computes benchmark deltas before the LLM call. Improves diagnostic accuracy and reduces token cost — the model reasons over signals, not raw CSV rows.</div>
+          <div class="feat-title">Expert Diagnosis</div>
+          <div class="feat-desc">Pre-processes 15+ metrics into calibrated signals before the LLM call. Claude diagnoses root causes — not symptoms — ordered by business impact with specific recommended actions.</div>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-title">15+ Metric Support</div>
-          <div class="feat-desc">CTR, CPA, CPC, CVR, win rate, ROAS, frequency, viewability, budget utilisation, floor price, and more. Handles both display and search campaign shapes.</div>
+          <div class="feat-title">Alert Rules Engine</div>
+          <div class="feat-desc">Define custom threshold rules per campaign or use the built-in defaults. CPA above target, ROAS below 1.0, win rate critical, frequency fatigue — all fire structured AlertReports with severity levels and messages.</div>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-title">Industry Benchmarks Built-in</div>
-          <div class="feat-desc">0.1% display CTR, 2% search CTR, 15% win rate floor — built-in reference points mean diagnosis is calibrated against reality, not just internal campaign history.</div>
+          <div class="feat-title">Budget Pacing Projection</div>
+          <div class="feat-desc">Given current spend, total budget, and elapsed time, projects spend to end of period. Detects on_pace, under_pacing, over_pacing, and burnout_risk — with estimated hours to exhaustion and a recommended action.</div>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-title">Severity Ordering</div>
-          <div class="feat-desc">Issues ordered by business impact — critical, warning, info — not by metric order in the CSV. Account managers know what to fix first without reading the whole report.</div>
+          <div class="feat-title">Vertical Benchmarks</div>
+          <div class="feat-desc">A gaming CTR of 0.2% is excellent. A fintech CTR of 0.2% is a problem. Industry-specific benchmark sets for ecomm, fintech, gaming, travel, and healthcare replace one-size-fits-all thresholds.</div>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-title">Batch Diagnosis</div>
-          <div class="feat-desc">Diagnose an entire campaign fleet from a single CSV. Cross-campaign pattern summary highlights systemic issues — budget allocation problems, shared creative fatigue, floor-price violations at scale.</div>
+          <div class="feat-title">Recommendation Prioritiser</div>
+          <div class="feat-desc">Sorts every diagnosis issue by effort vs. impact. Critical issues with low-effort fixes (bid adjustments, frequency caps) surface as quick wins. High-effort creative rebuilds are ranked below them — ops teams work the right queue.</div>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-title">Root Cause Not Symptoms</div>
-          <div class="feat-desc">Not "CTR is low" — but "bidding ₹15 below floor at ₹18 means you're not in the auction. This is not a creative problem." Diagnosis is precise enough to act on immediately.</div>
+          <div class="feat-title">Weekly Digest &amp; Comparison</div>
+          <div class="feat-desc">Aggregate an entire fleet of diagnoses into a client-facing weekly report with most-common-issues, health distribution, and an LLM-written summary. Compare any two campaigns head-to-head with per-metric deltas and a narrative.</div>
         </div>
       </div>
     </div>

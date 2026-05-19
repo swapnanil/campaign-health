@@ -107,3 +107,111 @@ class BenchmarkResponse(BaseModel):
     cpa_spike_threshold_pct: float
     budget_underpacing_threshold_pct: float
     roas_critical_threshold: float
+
+
+# Feature 1: Alert Rules Engine
+class AlertRule(BaseModel):
+    metric: str
+    condition: Literal["gt", "lt", "gte", "lte"]
+    threshold: float
+    severity: Literal["critical", "warning", "info"]
+    label: str
+
+
+class AlertTrigger(BaseModel):
+    rule_label: str
+    metric: str
+    observed_value: float
+    threshold: float
+    condition: str
+    severity: Literal["critical", "warning", "info"]
+    message: str
+
+
+class AlertReport(BaseModel):
+    campaign_id: str
+    triggers: list[AlertTrigger]
+    total_alerts: int
+    highest_severity: Literal["critical", "warning", "info", "none"]
+    alert_summary: str
+
+
+# Feature 2: Budget Pacing Projection
+class PacingProjection(BaseModel):
+    campaign_id: str
+    current_spend: float
+    total_budget: float
+    pct_budget_used: float
+    pct_period_elapsed: float
+    projected_total_spend: float
+    pacing_status: Literal["on_pace", "under_pacing", "over_pacing", "burnout_risk"]
+    hours_to_exhaustion: float | None = None
+    recommendation: str
+
+
+# Feature 3: Vertical Benchmarks
+class VerticalBenchmarks(BaseModel):
+    vertical: str
+    ctr_display_pct: float
+    ctr_search_pct: float
+    win_rate_healthy_pct: float
+    roas_target: float
+    frequency_fatigue_threshold: float
+    description: str
+
+
+# Feature 4: Recommendation Prioritiser
+class PrioritisedIssue(BaseModel):
+    metric: str
+    severity: Literal["critical", "warning", "info"]
+    root_cause: str
+    recommendation: str
+    estimated_impact: str
+    effort: Literal["low", "medium", "high"]
+    priority_score: int = Field(ge=0, le=100)
+
+
+class PrioritisedDiagnosis(BaseModel):
+    campaign_id: str
+    overall_health: Literal["healthy", "degraded", "critical"]
+    health_score: int
+    prioritised_issues: list[PrioritisedIssue]
+    quick_wins: list[str]
+
+
+# Feature 5: Weekly Digest
+class CampaignSummary(BaseModel):
+    campaign_id: str
+    campaign_name: str | None = None
+    overall_health: Literal["healthy", "degraded", "critical"]
+    health_score: int
+    top_issue: str | None = None
+
+
+class WeeklyDigest(BaseModel):
+    week_label: str | None = None
+    total_campaigns: int
+    healthy: int
+    degraded: int
+    critical: int
+    fleet_average_score: float
+    most_common_issues: list[str]
+    campaign_summaries: list[CampaignSummary]
+    digest_summary: str
+
+
+# Feature 6: Campaign Comparison
+class MetricDelta(BaseModel):
+    metric: str
+    campaign_a_value: str
+    campaign_b_value: str
+    advantage: Literal["a", "b", "parity"]
+
+
+class CampaignComparison(BaseModel):
+    campaign_a_id: str
+    campaign_b_id: str
+    metric_deltas: list[MetricDelta]
+    overall_winner: str | None = None
+    comparison_narrative: str
+    key_differentiators: list[str]
